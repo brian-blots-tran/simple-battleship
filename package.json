@@ -1,0 +1,15 @@
+{
+  "name": "simple-battleship",
+  "version": "1.0.0",
+  "description": "This repository holds a simple battleship game project originally started as a part of the Odin Project found here: https://www.theodinproject.com/lessons/node-path-javascript-battleship",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
