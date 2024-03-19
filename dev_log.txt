@@ -1,0 +1,31 @@
+March 18th 2024 - Beginning of dev log.
+This log is being started as a result of returning to this project after 5 months and needing to reassess.
+Simple Battleship project is a TDD project.
+Object oriented program using factory functions to create the game boards and ships.
+
+Game board factories are partially written.
+Ship factory is partially written.
+no other factories written.
+Player factory is a possible consideration. 
+Starting from scratch with proper planning should be in consideration.
+
+New plan:
+
+-Player Factory for single player, multiplayer and player vs computer.
+-Computer factory that extends player with logic for playing the game automatically 
+-Board factory contains logic related to the play area, placement and locations of ships on the game board 
+-ship factory contains logic related to ship health, taking hits and other characteristics.
+-Game Factory for initiating other factories and running the game logic.
+
+Player Factory
+-Name
+-each instance needs to be distinguishable from each other
+
+Computer Factory
+- is a player
+- contains logic that makes game moves on its own
+
+Board Factory
+- creates a game board
+- keeps track of locations of ships on the board
+- 
