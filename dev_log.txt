@@ -9,7 +9,7 @@ no other factories written.
 Player factory is a possible consideration. 
 Starting from scratch with proper planning should be in consideration.
 
-New plan:
+plan:
 
 -Player Factory for single player, multiplayer and player vs computer.
 -Computer factory that extends player with logic for playing the game automatically 
@@ -19,7 +19,6 @@ New plan:
 
 Player Factory
 -Name
--each instance needs to be distinguishable from each other
 
 Computer Factory
 - is a player
@@ -27,5 +26,161 @@ Computer Factory
 
 Board Factory
 - creates a game board
-- keeps track of locations of ships on the board
-- 
+- instantiates the number default number of ships according to game rules
+- keeps track of ship types and locations of ships on the board
+- keeps track of which spots have been fired on (misses and hits)
+
+Ship Factory
+- creates a ship
+- keeps track of ship health
+
+March 19 2024
+
+-On closer inspection of the code, the current plan is still worth pursuing.
+Ship factory is complete and sufficiently complies with tests.
+
+-Game Board factory is partially complete, but it seems like Test Driven Development was abandoned halfway through.
+-To continue I will have to go back carefully consider the requirements of the board object and write tests.
+
+-The challenge currently is thinking through the logic for the placeShip function. 
+We want to be able to place a ship in both horizontal and vertical orientations. 
+We don't want any parts ships to be placed outside of the 10x10 grid.
+We don't want ships to overlap with each other.
+We have to keep track of which coordinates are occupied by ships.
+We have a set amount of ships and set length for each of those ships.
+
+One approach when attempting to place a ship is to ask for a coordinate as an anchor point, determine the orientation, 
+then using the type of ship and it's length determine the amount of spaces it'll take up and record those coordinates. 
+For example on a board with coordinate numbers ascending horizontally and letters descending vertically, 
+a carrier ship that takes 5 spaces being places at A1 (very top left of the board) in a horizontal orientation will have the coordinates (A1, A2, A3, A4, A5).
+In a vertical orientation it's coordinates would be (A1, B1, C1, D1, E1).
+Therefore we only need 3 input parameters (a starting coordinate a length and an orientation) to place ships, but a place to store the resulting coordinates.
+We would then need to test if a vertical orientation would result in a coordinate that goes beyond the letter J or a horizontal orientation would go beyond the number 10. 
+If any of those coordinates go out of bounds then it fails to place the ship.
+
+The tests questions for this function should be 
+is a ship out of bounds horizontally? 
+is a ship out of bounds vertically? 
+is a ship placed in the correct orientation or in other words do the coordinates line up alphabetically or numerically (it has to be one or the other)?
+is the ship taking up the correct number of spaces?
+Other than that we just then need to worry about the data structure that stores both the ship object itself, 
+the coordinates it is taking up and how to associate one with the other.
+
+receiveAttack simply asks for a coordinate, determines if that lines up with any of the ships then records that as either a hit or a miss.
+We don't want to be able to receive the same coordinate twice regardless if it is a hit or a miss.
+
+test questions should be
+is the coordinate received within the bounds of the board?
+has this coordinate been received already? iow. Can it be sent again?
+is this coordinate a hit? if so was it recorded as a hit?
+is this coordinate a miss? if so was it recorded as a miss?
+
+April 8th 2024
+
+Completed initial code for placing ships in the gameboard factory.
+
+Includes the following considerations:
+-Ship objects are mapped to their corresponding types
+-Coordinates are recorded and associated with each ship in a seperate map
+-A list of occupied coordinates is maintained (to possibly be later used for recieving attacks)
+-Place any of the 5 types of ships over varying lengths
+-Can only place one of each of the 5 types
+-Can place horizontally or vertically
+-Cannot overlap any of the ships
+-Cannot go out of bounds 
+-Tests were created for the above
+
+Completed initial code for recieveAttack function
+-Can determine a hit
+-Can determine a miss
+-Can determine a repeated attack
+-Can determine if a hit results in a sunk ship
+-outputs/retuns strings with messages indicating the result
+
+TODO NEXT:
+-Create the Game class that will create two boards and handle the logic for actually playing the game of BattleShip 
+-2 Boards need to be created.
+-2 Players?
+-Turn Based Logic.
+
+April 9th 2024
+-robably need to start working on a UI...
+
+April 10th 2024
+-Created a basic frontend
+-Installed webpack and transitioned the gameboard, game and ship files to be more like a backend.
+-Need to work on a frontend for the game logic.
+there are essentially 2 phases per board per game.
+-A placement of ships phase and then an attacking phase.
+
+-Need to make a frontend that will be able to communicate the transitioning of phases as well as the data associated with each phase.
+The plan is to rerender the board after placement of ships and the after each attack. 
+Data should be sent, manipulated and then stored in the back end after each rerender of the board.
+Each rerender of the board should only happen after an action is taken ie and attack, or placement of ships.
+The players should be able to place all ships at once, then that data should be sent to the backend.
+
+-Sequence of a game:
+Game starts.
+Initial state of both backend and frontend is Phase 1 - placement of ships
+The frontend requests Player 1's board.
+Player 1's board is rendered empty.
+Player 1 places all their ships and passes turn.
+Information of ships Player 1 placed gets sent and stored to the backend.
+The frontend requests Player 2's board.
+Player 2's board is rendered empty.
+Player 2 places all their ships and passes turn.
+Information of ships Player 2 placced gets sent and stored to the backend.
+
+-At this point we transition the states of both frontend and backend to be phase 2 - taking turns attacking
+The backend sends information about Player 1's board to the frontend.
+Player 1's board is rendered with their ships on their board.
+Another board for choosing an attack location is rendered.
+Player 1 selects a coordinate to attack and confirms.
+Information is sent to the backend about the coordinate.
+The backend uses Player 2's board to determine a hit or a miss.
+The turn is passed.
+
+-Player 2's board is rendered with player 2's ships on their board as well as the attack that player 1 just made indicating a hit or a miss.
+The rest is a repeat of player 1's turn.
+Repeat until a player has no more ships with health.
+
+-I probably should have pseudo coded the entire project both frontened and backend portions before beginning to write the code.
+However, if i was only following the odin project requirements then I would already be done with just the backend code.
+Trying to refactor and elevate the project from the simpler version is harder than to do it right from the beginning.
+
+
+April 18th 2024
+
+-Need to make it so the frontend sends a ship, a coordinate and an orientation to the gameboard place() function.]
+
+April 24 2024
+
+-Implemented a frontend where ships can be dragged onto the board and the id of the ship is sent to the backend to process
+the placement of the ship.
+The processing part is not yet implemented.
+Currently, when a ship is dragged and dropped, the id of the ship which contains the type of the ship ie "cruiser"
+is sent to the gameboard render method. From the type of the ship we can determine the length of the ship and from the target
+of the grid on drop we can determine approximately where the user wants to place the ship.
+
+-Might need to adjust the place ship function to when a ship is being placed, 
+but a portion of it is out of bounds, it would auto place the ship in bounds. 
+Why? because currently we can drag the ship starting from anywhere in the div and place it anywhere on the board.
+For example you can start dragging from the head of a ship horizontally and try to place it on the far right of the board
+where the tail of the ship would go outside of bounds. Instead of denying the placement in this case, it would be nice if
+the game tried to place it for you within bounds.  
+
+-fixed a bug where placing a ship at the 10 column resulted in overflow back to the 1 column
+bug was caused by using the split function resulting in a column number of 1 when splitting B10 into 'b','1','0'.
+
+-Implemented the overflow functionality where the ships will auto place within bounds.
+
+-next is rotation and correction of placements (undo) functionality.
+- correction of placements and rotation functionality completeld.
+- however, currently if a ship is trying to be placed on top of another, 
+then it is not allowed and there is currently a bug where the ship disappears from the options list that needs to be fixed.
+it would be nice if it follows the auto placement rule, but that might cause problems.
+for now just fixing the disappearing from the list is best.
+
+-fixed rotation visuals
+-fixed disappearing ships when overlap
+-changed style of placement phase to be side by side
