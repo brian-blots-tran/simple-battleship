@@ -23,10 +23,10 @@ function gameBoard(number) {
       }
     }
     //ships
-    // ships.set('carrier', createShip(5));
-    // ships.set('battleship', createShip(4));
-    // ships.set('cruiser', createShip(3));
-    // ships.set('submarine', createShip(3));
+    ships.set('carrier', createShip(5));
+    ships.set('battleship', createShip(4));
+    ships.set('cruiser', createShip(3));
+    ships.set('submarine', createShip(3));
     ships.set('destroyer', createShip(2));
   }
 

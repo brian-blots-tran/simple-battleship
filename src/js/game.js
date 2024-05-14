@@ -231,6 +231,12 @@ function game() {
       });
 
       confirmDiv.addEventListener('click', () => {
+        // if (board1.getOccupiedCoords().length < 16) {
+        //   return false;
+        // }
+        // if (board2.getOccupiedCoords().length < 16) {
+        //   return false;
+        // }
         console.log('confirm');
         if (board.getBoardNumber() === 1) {
           ShipPlacementPhase(board2);
