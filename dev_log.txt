@@ -184,3 +184,23 @@ for now just fixing the disappearing from the list is best.
 -fixed rotation visuals
 -fixed disappearing ships when overlap
 -changed style of placement phase to be side by side
+
+April 30 2024
+
+-Changed html related to placement of ships to be loaded via javascript
+-Next is to implement phase change logic and second board
+-Need to indicate which player/board is current
+-Starting screen?
+-remove first board / shroud the screen once boats are placed (screen for when trasitioning players)
+
+May 14 2024
+
+-Start screen
+-Placement of ships for player 1 x
+-Placement of ships for player 2 x
+-Attack phase for player 1 
+-Attack phase for player 2
+-repeat until one player is out of ships with health
+-display winner
+
+-make html load via javascript x

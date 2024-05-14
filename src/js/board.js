@@ -3,14 +3,16 @@
 
 const createShip = require('./ship.js');
 
-function gameBoard() {
+function gameBoard(number) {
+  const boardNumber = number;
   const coords = [];
   const shipLocations = new Map();
   const ships = new Map();
   const occupiedCoordinates = [];
   const attackedCoordinates = [];
-  const coordinatesThatAreHits = [];
-
+  const attackedCoordinatesThatAreHits = [];
+  const occupiedCoordinatesThatAreHits = [];
+  const friendlyCoordinatesThatAreMisses = [];
   //initialized board coordinates and ship objects
   function init() {
     //coords
@@ -21,10 +23,10 @@ function gameBoard() {
       }
     }
     //ships
-    ships.set('carrier', createShip(5));
-    ships.set('battleship', createShip(4));
-    ships.set('cruiser', createShip(3));
-    ships.set('submarine', createShip(3));
+    // ships.set('carrier', createShip(5));
+    // ships.set('battleship', createShip(4));
+    // ships.set('cruiser', createShip(3));
+    // ships.set('submarine', createShip(3));
     ships.set('destroyer', createShip(2));
   }
 
@@ -122,28 +124,23 @@ function gameBoard() {
     });
     return shipsStatus;
   }
-
+  function getBoardNumber() {
+    return boardNumber;
+  }
   //takes a coordinate, determines if it was a hit, miss or repeated attack and returns a message
   function receiveAttack(coordinate) {
-    if (attackedCoordinates.includes(coordinate)) {
-      return `Cannot attack again at ${coordinate}`;
-    }
-
-    attackedCoordinates.push(coordinate);
     let isShipHere = getShipFromCoordinate(coordinate);
 
     if (isShipHere) {
-      coordinatesThatAreHits.push(coordinate);
+      occupiedCoordinatesThatAreHits.push(coordinate);
       ships.get(isShipHere).hit();
-      if (ships.get(isShipHere).isSunk()) {
-        return `Attack at ${coordinate} was a hit and sunk the enemy ${isShipHere}`;
-      }
-      return `Attack at ${coordinate} was a hit`;
+      return true;
     }
-    return `Attack at ${coordinate} was a miss`;
+    friendlyCoordinatesThatAreMisses.push(coordinate);
+    return false;
   }
 
-  function renderGameBoard(phase) {
+  function renderGameBoard() {
     const gridContainer = document.createElement('div');
     gridContainer.classList.add('grid-container');
     gridContainer.setAttribute('id', 'gameBoard');
@@ -168,7 +165,7 @@ function gameBoard() {
         //ew way to select the ship container
         document
           .getElementById(shipBeingPlacedID)
-          .firstChild.nextSibling.nextElementSibling.classList.add('hidden');
+          .firstChild.nextElementSibling.classList.add('hidden');
       }
     }
     gridContainer.addEventListener('dragover', dragoverHandler);
@@ -179,9 +176,33 @@ function gameBoard() {
       gridCell.classList.add('grid-cell');
       gridCell.setAttribute('data-coord', `${coords[i]}`);
       gridCell.appendChild(document.createTextNode(`${coords[i]}`));
-      if (occupiedCoordinates.includes(coords[i])) {
+      if (occupiedCoordinatesThatAreHits.includes(coords[i])) {
+        gridCell.classList.add('attacked-hit');
+      } else if (friendlyCoordinatesThatAreMisses.includes(coords[i])) {
+        gridCell.classList.add('attacked');
+      } else if (occupiedCoordinates.includes(coords[i])) {
         gridCell.classList.add('occupied');
       }
+      gridContainer.appendChild(gridCell);
+    }
+    return gridContainer;
+  }
+  function renderAttacksBoard() {
+    const gridContainer = document.createElement('div');
+    gridContainer.classList.add('grid-container');
+    gridContainer.setAttribute('id', 'attack-board');
+
+    for (let i = 0; i < coords.length; i++) {
+      const gridCell = document.createElement('div');
+      gridCell.classList.add('grid-cell', 'attack-cell');
+      gridCell.setAttribute('data-coord', `${coords[i]}`);
+      gridCell.appendChild(document.createTextNode(`${coords[i]}`));
+      if (attackedCoordinatesThatAreHits.includes(coords[i])) {
+        gridCell.classList.add('attacked-hit');
+      } else if (attackedCoordinates.includes(coords[i])) {
+        gridCell.classList.add('attacked');
+      }
+
       gridContainer.appendChild(gridCell);
     }
     return gridContainer;
@@ -234,6 +255,31 @@ function gameBoard() {
       .lastElementChild.classList.remove('hidden');
     shipLocations.delete(lastAddedShip);
   }
+  function hasShipsAlive() {
+    let cumulativeHealth = 0;
+    ships.forEach((value, key, map) => {
+      cumulativeHealth += value.getHealth();
+    });
+
+    if (cumulativeHealth == 0) {
+      return false;
+    }
+    return true;
+  }
+  function getAttackedCoords() {
+    return attackedCoordinates;
+  }
+  function addAttackedCoord(coord) {
+    attackedCoordinates.push(coord);
+  }
+  function recordAttack(isHit, coord) {
+    if (isHit) {
+      return `Player ${boardNumber} fired at ${coord} and was a hit!`;
+    } else {
+      attackedCoordinates.push(coord);
+      return `Player ${boardNumber} fired at ${coord} and was a miss!`;
+    }
+  }
   return {
     init,
     getCoords,
@@ -244,9 +290,15 @@ function gameBoard() {
     getShipCoords,
     getOccupiedCoords,
     getShipsStatuses,
+    getBoardNumber,
     renderGameBoard,
     resetBoardPlacements,
     undoLastPlacement,
+    hasShipsAlive,
+    renderAttacksBoard,
+    addAttackedCoord,
+    getAttackedCoords,
+    recordAttack,
   };
 }
 
